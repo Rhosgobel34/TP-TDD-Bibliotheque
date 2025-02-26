@@ -1,0 +1,6 @@
+@TP_TDD_Bibliotheque_HostAddress = http://localhost:5182
+
+GET {{TP_TDD_Bibliotheque_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
