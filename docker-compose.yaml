@@ -1,0 +1,16 @@
+networks:
+  ntw-bibliotheque: {}
+
+services:
+  bdd-bibliotheque:
+    image: mysql:5.7
+    container_name: bdd-bibliotheque
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: bibliotheque
+    networks:
+      - ntw-bibliotheque
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
