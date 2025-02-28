@@ -4,7 +4,7 @@ FLUSH PRIVILEGES;
 
 CREATE TABLE editor (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL
+    editor_name VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE civility (
@@ -38,6 +38,7 @@ CREATE TABLE subscriber (
     first_name VARCHAR(255) NOT NULL,
     last_name VARCHAR(255) NOT NULL,
     birth_date DATE NOT NULL,
+    email VARCHAR(255) NOT NULL,
     civility_id INT,
     FOREIGN KEY (civility_id) REFERENCES civility(id) ON DELETE SET NULL
 );
