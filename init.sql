@@ -111,3 +111,5 @@ CREATE TABLE personify (
     FOREIGN KEY (subscriber_id) REFERENCES subscriber(id) ON DELETE CASCADE,
     FOREIGN KEY (civility_id) REFERENCES civility(id) ON DELETE CASCADE
 );
+
+INSERT INTO bibliotheque.editor (id, editor_name) VALUES (1, 'premier editeur');

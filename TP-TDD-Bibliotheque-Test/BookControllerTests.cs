@@ -203,5 +203,261 @@ namespace TP_TDD_Bibliotheque_Test
             var response = await _client.PostAsJsonAsync("/book", book);
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
+
+        [Fact]
+        public async Task GetBookById_ShouldReturn200Ok_WhenBookExists()
+        {
+            Book book = new Book
+            {
+                ISBN = GenerateValidISBN10(),
+                Title = "The Art of Computer Programming",
+                Available = true,
+                EditorId = 1
+            };
+            var response = await _client.PostAsJsonAsync("/book", book);
+            var createdBook = await response.Content.ReadFromJsonAsync<Book>();
+            response = await _client.GetAsync($"/book/{createdBook.Id}");
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetBookById_ShouldReturn404NotFound_WhenBookDoesNotExist()
+        {
+            var response = await _client.GetAsync("/book/999");
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateBook_ShouldReturn200Ok_WhenBookExistsAndTitleChanged()
+        {
+            Book book = new Book
+            {
+                ISBN = GenerateValidISBN10(),
+                Title = "The Art of Computer Programming",
+                Available = true,
+                EditorId = 1
+            };
+            var response = await _client.PostAsJsonAsync("/book", book);
+            var createdBook = await response.Content.ReadFromJsonAsync<Book>();
+            createdBook.Title = "The Art of Computer Programming, Volume 1";
+            response = await _client.PutAsJsonAsync($"/book/{createdBook.Id}", createdBook);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateBook_ShouldReturn400BadRequest_WhenBookExistsAndIsbnAlreadyExist()
+        {
+            Book book1 = new Book
+            {
+                ISBN = GenerateValidISBN10(),
+                Title = "The Art of Computer Programming",
+                Available = true,
+                EditorId = 1
+            };
+            var response = await _client.PostAsJsonAsync("/book", book1);
+            var createdBook1 = await response.Content.ReadFromJsonAsync<Book>();
+            Book book2 = new Book
+            {
+                ISBN = GenerateValidISBN10(),
+                Title = "The Art of Computer Programming, Volume 1",
+                Available = true,
+                EditorId = 1
+            };
+            response = await _client.PostAsJsonAsync("/book", book2);
+            var createdBook2 = await response.Content.ReadFromJsonAsync<Book>();
+            createdBook2.ISBN = createdBook1.ISBN;
+            response = await _client.PutAsJsonAsync($"/book/{createdBook2.Id}", createdBook2);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateBook_ShouldReturn200Ok_WhenBookExistsAndIsUnchanged()
+        {
+            Book book = new Book
+            {
+                ISBN = GenerateValidISBN10(),
+                Title = "The Art of Computer Programming",
+                Available = true,
+                EditorId = 1
+            };
+            var response = await _client.PostAsJsonAsync("/book", book);
+            var createdBook = await response.Content.ReadFromJsonAsync<Book>();
+            response = await _client.PutAsJsonAsync($"/book/{createdBook.Id}", createdBook);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateBook_ShouldReturn400BadRequest_WhenBookIsNull()
+        {
+            Book book = null;
+            var response = await _client.PutAsJsonAsync("/book/1", book);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateBook_ShouldReturn400BadRequest_WhenEditorDoesNotExist()
+        {
+            Book book = new Book
+            {
+                ISBN = GenerateValidISBN10(),
+                Title = "The Art of Computer Programming",
+                Available = true,
+                EditorId = 1
+            };
+            var response = await _client.PostAsJsonAsync("/book", book);
+            var createdBook = await response.Content.ReadFromJsonAsync<Book>();
+            createdBook.EditorId = 999;
+            response = await _client.PutAsJsonAsync($"/book/{createdBook.Id}", createdBook);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateBook_ShouldReturn400BadRequest_WhenISBNIsNullOrEmpty()
+        {
+            Book book = new Book
+            {
+                ISBN = GenerateValidISBN10(),
+                Title = "The Art of Computer Programming",
+                Available = true,
+                EditorId = 1
+            };
+            var response = await _client.PostAsJsonAsync("/book", book);
+            var createdBook = await response.Content.ReadFromJsonAsync<Book>();
+            createdBook.ISBN = "";
+            response = await _client.PutAsJsonAsync($"/book/{createdBook.Id}", createdBook);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateBook_ShouldReturn400BadRequest_WhenTitleIsNullOrEmpty()
+        {
+            Book book = new Book
+            {
+                ISBN = GenerateValidISBN10(),
+                Title = "The Art of Computer Programming",
+                Available = true,
+                EditorId = 1
+            };
+            var response = await _client.PostAsJsonAsync("/book", book);
+            var createdBook = await response.Content.ReadFromJsonAsync<Book>();
+            createdBook.Title = "";
+            response = await _client.PutAsJsonAsync($"/book/{createdBook.Id}", createdBook);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateBook_ShouldReturn400BadRequest_WhenISBNAlreadyExists()
+        {
+            Book book1 = new Book
+            {
+                ISBN = GenerateValidISBN10(),
+                Title = "The Art of Computer Programming",
+                Available = true,
+                EditorId = 1
+            };
+            var response = await _client.PostAsJsonAsync("/book", book1);
+            var createdBook1 = await response.Content.ReadFromJsonAsync<Book>();
+            Book book2 = new Book
+            {
+                ISBN = GenerateValidISBN10(),
+                Title = "The Art of Computer Programming, Volume 1",
+                Available = true,
+                EditorId = 1
+            };
+            response = await _client.PostAsJsonAsync("/book", book2);
+            var createdBook2 = await response.Content.ReadFromJsonAsync<Book>();
+            createdBook2.ISBN = createdBook1.ISBN;
+            response = await _client.PutAsJsonAsync($"/book/{createdBook2.Id}", createdBook2);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateBook_ShouldReturn400BadRequest_WhenEditorIdIsZero()
+        {
+            Book book = new Book
+            {
+                ISBN = GenerateValidISBN10(),
+                Title = "The Art of Computer Programming",
+                Available = true,
+                EditorId = 1
+            };
+            var response = await _client.PostAsJsonAsync("/book", book);
+            var createdBook = await response.Content.ReadFromJsonAsync<Book>();
+            createdBook.EditorId = 0;
+            response = await _client.PutAsJsonAsync($"/book/{createdBook.Id}", createdBook);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateBook_ShouldReturn400BadRequest_WhenIsbn10IsInvalid()
+        {
+            Book book = new Book
+            {
+                ISBN = GenerateValidISBN10(),
+                Title = "The Art of Computer Programming",
+                Available = true,
+                EditorId = 1
+            };
+            var response = await _client.PostAsJsonAsync("/book", book);
+            var createdBook = await response.Content.ReadFromJsonAsync<Book>();
+            createdBook.ISBN = "01234567895";
+            response = await _client.PutAsJsonAsync($"/book/{createdBook.Id}", createdBook);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateBook_ShouldReturn400BadRequest_WhenIsbn13IsInvalid()
+        {
+            Book book = new Book
+            {
+                ISBN = GenerateValidISBN10(),
+                Title = "The Art of Computer Programming",
+                Available = true,
+                EditorId = 1
+            };
+            var response = await _client.PostAsJsonAsync("/book", book);
+            var createdBook = await response.Content.ReadFromJsonAsync<Book>();
+            createdBook.ISBN = "9781234567895";
+            response = await _client.PutAsJsonAsync($"/book/{createdBook.Id}", createdBook);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateBook_ShouldReturn404NotFound_WhenBookDoesNotExist()
+        {
+            Book book = new Book
+            {
+                Id = 999,
+                ISBN = GenerateValidISBN10(),
+                Title = "The Art of Computer Programming",
+                Available = true,
+                EditorId = 1
+            };
+            var response = await _client.PutAsJsonAsync($"/book/{book.Id}", book);
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task DeleteBook_ShouldReturn204NoContent_WhenBookExists()
+        {
+            Book book = new Book
+            {
+                ISBN = GenerateValidISBN10(),
+                Title = "The Art of Computer Programming",
+                Available = true,
+                EditorId = 1
+            };
+            var response = await _client.PostAsJsonAsync("/book", book);
+            var createdBook = await response.Content.ReadFromJsonAsync<Book>();
+            response = await _client.DeleteAsync($"/book/{createdBook.Id}");
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task DeleteBook_ShouldReturn404NotFound_WhenBookDoesNotExist()
+        {
+            var response = await _client.DeleteAsync("/book/999");
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
     }
 }

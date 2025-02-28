@@ -49,7 +49,7 @@ public class BookController : ControllerBase
 
         if (await _context.Books.AnyAsync(b => b.ISBN == book.ISBN))
         {
-            return BadRequest("Le livre existe déjà");
+            return BadRequest("L'isbn est déjà attribué");
         }
 
         if (book.EditorId == 0)
@@ -74,6 +74,91 @@ public class BookController : ControllerBase
         }
 
         return Ok(book);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateBook(int id, [FromBody] Book updatedBook)
+    {
+        if (id != updatedBook.Id)
+        {
+            return BadRequest("L'ID fourni dans l'URL ne correspond pas à celui du livre.");
+        }
+
+        var book = await _context.Books.FindAsync(id);
+
+        if (book == null)
+        {
+            return NotFound();
+        }
+
+        if (string.IsNullOrEmpty(updatedBook.ISBN) || string.IsNullOrEmpty(updatedBook.Title))
+        {
+            return BadRequest("Le livre est invalide");
+        }
+
+        if (updatedBook.EditorId == 0)
+        {
+            return BadRequest("L'éditeur est invalide");
+        }
+
+        var editor = await _context.Editors.FindAsync(updatedBook.EditorId);
+        if (editor == null)
+        {
+            return BadRequest("L'éditeur n'existe pas");
+        }
+
+        if (updatedBook.ISBN.Length == 13)
+        {
+            if (!CheckISBN13(updatedBook.ISBN))
+            {
+                return BadRequest("L'ISBN-13 est invalide");
+            }
+        }
+        else if (updatedBook.ISBN.Length == 10)
+        {
+            if (!CheckISBN10(updatedBook.ISBN))
+            {
+                return BadRequest("L'ISBN-10 est invalide");
+            }
+        }
+        else
+        {
+            return BadRequest("L'ISBN n'a pas un taille valide");
+        }
+
+        if (book.ISBN != updatedBook.ISBN && await _context.Books.AnyAsync(b => b.ISBN == book.ISBN))
+        {
+            return BadRequest("L'isbn est déjà attribué");
+        }
+
+        book.ISBN = updatedBook.ISBN;
+        book.Title = updatedBook.Title;
+        book.Available = updatedBook.Available;
+        book.EditorId = updatedBook.EditorId;
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return StatusCode(500, "Erreur lors de la mise à jour du livre.");
+        }
+
+        return Ok();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteBook(int id)
+    {
+        var book = await _context.Books.FindAsync(id);
+        if (book == null)
+        {
+            return NotFound();
+        }
+        _context.Books.Remove(book);
+        await _context.SaveChangesAsync();
+        return NoContent();
     }
 
     private static bool CheckISBN13(string isbn)
