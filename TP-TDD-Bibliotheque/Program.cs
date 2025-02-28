@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace TP_TDD_Bibliotheque
 {
     public class Program
@@ -6,9 +8,14 @@ namespace TP_TDD_Bibliotheque
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
+                ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))));
+
             // Add services to the container.
 
             builder.Services.AddControllers();
+            builder.Services.AddEndpointsApiExplorer();
 
             var app = builder.Build();
 
